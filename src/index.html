@@ -36,14 +36,37 @@
 				color: var(--brand-experiment-200);
 			}
 			
+     /*#roomTitle {
+        height:5%;
+        position:absolute;
+        left:0px;
+        width:100%;
+        top:0;
+        color:white;
+        font-weight:bold;
+        padding-top:calc(5% - 5px);
+        text-align:center;
+        border-bottom : 3px solid white;
+      }
+      */
+
 			#messagesContainer {
 			  display: flex;
-			  flex-direction: column-reverse;	
+			  flex-direction: column-reverse;
+        height:calc(100% - 40px);
+        position:absolute;
+        left:0px;
+        padding-left:10px;
+        width:calc(100% - 10px);
+        top:0;
+        overflow:hidden;
+        overflow-y:scroll;
 			}
 		</style>
 	</head>
 	<body>
-		<div id="messagesContainer" style="height:calc(100% - 20px);overflow:hidden;overflow-y:scroll"></div>
+    <!--<div id="roomTitle"></div>-->
+		<div id="messagesContainer"></div>
 		<form id="messageSend" onsubmit="formSubmit()">
 			<input type="text" id="content" autocomplete="off" style="position:absolute;bottom:0;left:0;width:80%;height:20px" placeholder="Envoyer un message...">
 			<input type="submit" name="submit" style="position:absolute;bottom:0;left:80%;width:20%;height:20px" value="Envoyer">
@@ -51,9 +74,18 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			var socket = io();
+      container = document.getElementById("messagesContainer")
 			channel = location.href.split('channel=')[1]
       contentInput = document.getElementById('content')
-
+      function inIframe () {
+          try {return window.self !== window.top;}
+          catch (e) {return true;}
+      }
+      
+      if(inIframe()){
+        document.getElementById('messageSend').style.display = 'none'
+        container.style.height = "100%"
+      } 
 			function objectToQueryString(obj) {
 			  var str = [];
 			  for (var p in obj)
@@ -63,7 +95,7 @@
 			  return str.join("&");
 			}
 
-			container = document.getElementById("messagesContainer")
+
 			readMessages(channel)
 			
       function mentionId(id) {
@@ -72,16 +104,26 @@
 
 			function readMessages(channel){
 				fetch("/api?channel="+channel).then(res=>res.json()).then((messages)=>{
-					container.innerHTML = ''
+					container.innerHTML = '<br>'
 					messages.forEach((message)=>{
 						container.innerHTML += message.formatted
 					})
+          container.innerHTML += "<br>"
 				})
 			}
 			function askTitle(channelId){
-         fetch('/channel?id='+channelId).then(res=>res.json()).then((channel)=>{
-              console.log("Actual channel:",channel)
-              document.title = channel.name
+         fetch('/channel?id='+channelId).then(res=>res.json()).then((res)=>{
+              //console.log("Actual channel:",channel)
+              let title = res.channel.name+" ("+res.guild.name+")"
+              //document.getElementById('roomTitle').innerHTML = title
+              document.title = title
+              var link = document.querySelector("link[rel~='icon']");
+              if (!link) {
+                  link = document.createElement('link');
+                  link.rel = 'icon';
+                  document.getElementsByTagName('head')[0].appendChild(link);
+              }
+              link.href = res.icon;
          })
       }
       if(channel!=undefined) askTitle(channel)

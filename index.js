@@ -13,9 +13,9 @@ client.on('ready',()=>{
 	const server = http.createServer(app);
 	const { Server } = require("socket.io");
 	const io = new Server(server);
-	client.on('message',(msg)=>{
-		io.emit('message',msg)
-	})
+	client.on('message',(msg)=>{io.emit('message',msg)})
+  client.on('messageDelete',(msg)=>{io.emit('message',msg)})
+  client.on('messageUpdate',(msg)=>{io.emit('message',msg)})
 	app.use(cors())
 	app.get('/api',async (req,res)=>{
     if(req.query.channel!='undefined') {
@@ -27,6 +27,9 @@ client.on('ready',()=>{
         // console.log(messages)
         messages.forEach((message)=>{
           //color
+          let guild = message.guild;
+        let member = guild.member(message.author);
+        let nickname = member ? member.displayName : null;
           let color;
           if(message.member!=null) color = message.member.displayHexColor
           else color = "#ffffff"
@@ -37,10 +40,24 @@ client.on('ready',()=>{
             }
           })
           if(content=='') content = toHTML("`[Attachement]`")
+          let moderator = '';
+          //console.log(message.author.username,message.member.hasPermission('MANAGE_MESSAGES'))
+          if(message.member && message.member.hasPermission('ADMINISTRATOR'))
+            moderator = '<img class="d-emoji" src="https://cdn0.iconfinder.com/data/icons/construction-12/64/club_hammer-512.png">'
+            //console.log(message.guild.ownerID,message.author.id)
+          if(message.guild.ownerID == message.author.id)
+            moderator = '<img class="d-emoji" src="https://cliply.co/wp-content/uploads/2021/03/392103930_CROWN_EMOJI_400.png">'
+          let bot = ''
+          if(message.author.bot && !message.webhookID)
+            bot = '<img class="d-emoji" src="https://emoji.gg/assets/emoji/9435-blurple-bot.png">'
+          let edited = ''
+          if(message.editedTimestamp) edited = '<span style="color:gray;user-select: none;">(edited)</span>'
           let formatted = `
             <message id="${id}">
-              <span onclick="mentionId('${author.id}')" style="color:${color}">${author.username}:</span>
+              <img class="d-emoji" style="border-radius:4px" src="${message.author.avatarURL()}">
+              <span onclick="mentionId('${author.id}')" style="color:${color}">${nickname!=null?nickname:author.username} ${bot}${moderator}:</span>
               <span style="color:white">${content}</span>
+              ${edited}
               <br>
             </message>
           `
@@ -110,10 +127,26 @@ client.on('ready',()=>{
 		res.send("ok")
 	})
   app.get('/channel',(req,res)=>{
-    res.send(client.channels.cache.get(req.query.id))
+    res.send({
+      channel: client.channels.cache.get(req.query.id),
+      guild: client.guilds.cache.get(client.channels.cache.get(req.query.id).guild.id),
+      icon:client.guilds.cache.get(client.channels.cache.get(req.query.id).guild.id).iconURL()
+    })
+  })
+  app.get('/logs',(req,res)=>{
+    res.sendFile(__dirname+"/logs.txt")
   })
 
 	server.listen(port)
 	console.log(client.user.username+"#"+client.user.discriminator,"is ready")
 })
 client.login('OTA0NzEzMDk1MDE0OTIwMjEz'+'.YX_hug.JCFnG8vkcjMKnHvSU_oHRZpGMvs')
+
+process.on('unhandledRejection', (reason, p) => {
+  const fs = require('fs');
+  const error = 'Unhandled Rejection at: Promise'+p+'reason:'+reason+"\n"
+  fs.appendFile('logs.txt', error, function (err) {
+    if (err) throw err;
+    console.log('Error ! Check logs !');
+  });
+});

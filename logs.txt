@@ -1,0 +1,1 @@
+Unhandled Rejection at: Promise[object Promise]reason:TypeError: Cannot read property 'username' of undefined
