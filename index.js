@@ -22,7 +22,7 @@ client.on('ready',()=>{
       let messagesArray = new Array()
       let channel = client.channels.cache.get(req.query.channel)
       await channel.messages.fetch({
-        limit: 100,
+        limit: 65,
       }).then((messages) => {
         // console.log(messages)
         messages.forEach((message)=>{
@@ -36,7 +36,7 @@ client.on('ready',()=>{
           let {author,id} = message
           let content = toHTML(message.content,  {
             discordCallback: {
-              user: node => `<mention class="mention wrapper-3WhCwL mention interactive">@${client.users.cache.get(node.id).username}</mention>`
+              user: node => `<mention class="mention wrapper-3WhCwL mention interactive">@${client.users.cache.get(node.id)?client.users.cache.get(node.id).username:'[Infetchable]'}</mention>`
             }
           })
           if(content=='') content = toHTML("`[Attachement]`")
@@ -140,10 +140,11 @@ client.on('ready',()=>{
 	server.listen(port)
 	console.log(client.user.username+"#"+client.user.discriminator,"is ready")
 })
-client.login('OTA0NzEzMDk1MDE0OTIwMjEz'+'.YX_hug.JCFnG8vkcjMKnHvSU_oHRZpGMvs')
+client.login('OTA0NzEzMDk1MDE0OTIwMjEz'+'.YX_hug.QsWKCyiNVG40kxIUUAjG4ljPczg')
 
 process.on('unhandledRejection', (reason, p) => {
   const fs = require('fs');
+  console.log('Unhandled Rejection at: Promise',p,'reason:',reason)
   const error = 'Unhandled Rejection at: Promise'+p+'reason:'+reason+"\n"
   fs.appendFile('logs.txt', error, function (err) {
     if (err) throw err;

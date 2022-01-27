@@ -1,1 +1,5 @@
-Unhandled Rejection at: Promise[object Promise]reason:TypeError: Cannot read property 'username' of undefined
+Unhandled Rejection at: Promise[object Promise]reason:DiscordAPIError: Missing Permissions
+Unhandled Rejection at: Promise[object Promise]reason:Error [TOKEN_INVALID]: An invalid token was provided.
+Unhandled Rejection at: Promise[object Promise]reason:Error [TOKEN_INVALID]: An invalid token was provided.
+Unhandled Rejection at: Promise[object Promise]reason:Error [TOKEN_INVALID]: An invalid token was provided.
+Unhandled Rejection at: Promise[object Promise]reason:Error [TOKEN_INVALID]: An invalid token was provided.
